@@ -1,17 +1,24 @@
 from django.shortcuts import render
 
-
-from rest_framework import generics
+from .models import User
+from rest_framework import generics, views
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
+from .serializers import (
+    RegisterSerializer,
+    ChangePasswordSerializer,
+    UpdateUserSerializer,
+)
 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, OutstandingToken, BlacklistedToken
+
 # Create your views here.
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
 
 class ChangePasswordView(generics.UpdateAPIView):
 
@@ -19,11 +26,13 @@ class ChangePasswordView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
 
+
 class UpdateProfileView(generics.UpdateAPIView):
 
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
-    serializer_class = UpdateUserSerialize
+    serializer_class = UpdateUserSerializer
+
 
 # https://medium.com/django-rest/logout-django-rest-framework-eb1b53ac6d35
 class LogoutView(views.APIView):
@@ -38,6 +47,7 @@ class LogoutView(views.APIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class LogoutAllView(APIView):
     permission_classes = (IsAuthenticated,)
